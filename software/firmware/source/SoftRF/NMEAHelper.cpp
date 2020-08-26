@@ -28,6 +28,8 @@
 
 #define ADDR_TO_HEX_STR(s, c) (s += ((c) < 0x10 ? "0" : "") + String((c), HEX))
 
+#define PGRMZ_INTERVAL 125
+
 #if defined(NMEA_TCP_SERVICE)
 WiFiServer NmeaTCPServer(NMEA_TCP_PORT);
 NmeaTCP_t NmeaTCP[MAX_NMEATCP_CLIENTS];
@@ -52,7 +54,7 @@ const char *NMEA_CallSign_Prefix[] = {
   [RF_PROTOCOL_FANET]     = "FAN"
 };
 
-#define isTimeToPGRMZ() (millis() - PGRMZ_TimeMarker > 1000)
+#define isTimeToPGRMZ() (millis() - PGRMZ_TimeMarker > PGRMZ_INTERVAL)
 unsigned long PGRMZ_TimeMarker = 0;
 
 extern uint32_t tx_packets_counter, rx_packets_counter;
@@ -120,8 +122,23 @@ void NMEA_loop()
             (int) (ThisAircraft.pressure_altitude * _GPS_FEET_PER_METER),
             -1000, 60000);
 
-    snprintf_P(NMEABuffer, sizeof(NMEABuffer), PSTR("$PGRMZ,%d,f,3*"),
-            altitude ); /* feet , 3D fix */
+    int altitudePTAS1 = constrain(
+            (int) (ThisAircraft.pressure_altitude * _GPS_FEET_PER_METER + 2000),
+            0, 99999);
+
+    int vario = constrain(
+            (int) (ThisAircraft.vs * 0.009875 * 10.0 + 200), //to knots*10+200
+            0, 400);
+
+    // snprintf_P(NMEABuffer, sizeof(NMEABuffer), PSTR("$PGRMZ,%d,f,3*"),
+    //         altitude ); /* feet , 3D fix */
+
+    // NMEA_add_checksum(NMEABuffer, sizeof(NMEABuffer) - strlen(NMEABuffer));
+
+    // NMEA_Out((byte *) NMEABuffer, strlen(NMEABuffer), false);
+
+    snprintf_P(NMEABuffer, sizeof(NMEABuffer), PSTR("$PTAS1,%d,%d,%d,xxx*"),
+            vario, vario, altitudePTAS1 ); /* feet , 3D fix */
 
     NMEA_add_checksum(NMEABuffer, sizeof(NMEABuffer) - strlen(NMEABuffer));
 

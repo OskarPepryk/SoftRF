@@ -52,12 +52,13 @@ Adafruit_MPL3115A2 mpl3115a2 = Adafruit_MPL3115A2();
 static unsigned long BaroTimeMarker = 0;
 static float prev_pressure_altitude = 0;
 
-#define VS_AVERAGING_FACTOR   4
+#define VS_AVERAGING_FACTOR   20
+#define VS_AVERAGING_PERIOD 2000
 static float Baro_VS[VS_AVERAGING_FACTOR];
 static int avg_ndx = 0;
 
 /* 4 baro sensor readings per second */
-#define isTimeToBaro() ((millis() - BaroTimeMarker) > (1000 / VS_AVERAGING_FACTOR))
+#define isTimeToBaro() ((millis() - BaroTimeMarker) > (VS_AVERAGING_PERIOD / VS_AVERAGING_FACTOR))
 
 #if !defined(EXCLUDE_BMP180)
 static bool bmp180_probe()
