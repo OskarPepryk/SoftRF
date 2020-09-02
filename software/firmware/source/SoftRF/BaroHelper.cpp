@@ -29,7 +29,8 @@ void Baro_loop()     {}
 #include <Adafruit_BMP085.h>
 #endif /* EXCLUDE_BMP180 */
 #if !defined(EXCLUDE_BMP280)
-#include <Adafruit_BMP280.h>
+#include <Wire.h>
+#include <Adafruit_BME280.h>
 #endif /* EXCLUDE_BMP280 */
 #if !defined(EXCLUDE_MPL3115A2)
 #include <Adafruit_MPL3115A2.h>
@@ -43,7 +44,7 @@ barochip_ops_t *baro_chip = NULL;
 Adafruit_BMP085 bmp180;
 #endif /* EXCLUDE_BMP180 */
 #if !defined(EXCLUDE_BMP280)
-Adafruit_BMP280 bmp280;
+Adafruit_BME280 bmp280;
 #endif /* EXCLUDE_BMP280 */
 #if !defined(EXCLUDE_MPL3115A2)
 Adafruit_MPL3115A2 mpl3115a2 = Adafruit_MPL3115A2();
@@ -115,15 +116,21 @@ barochip_ops_t bmp180_ops = {
 static bool bmp280_probe()
 {
   return (
-          bmp280.begin(BMP280_ADDRESS,     BMP280_CHIPID) ||
-          bmp280.begin(BMP280_ADDRESS_ALT, BMP280_CHIPID) ||
-          bmp280.begin(BMP280_ADDRESS,     BME280_CHIPID) ||
-          bmp280.begin(BMP280_ADDRESS_ALT, BME280_CHIPID)
+          bmp280.begin(BME280_ADDRESS,&Wire) ||
+          bmp280.begin(BME280_ADDRESS_ALTERNATE,&Wire) ||
+          bmp280.begin(BME280_ADDRESS,&Wire1) ||
+          bmp280.begin(BME280_ADDRESS_ALTERNATE,&Wire1)
          );
 }
 
 static void bmp280_setup()
 {
+    bmp280.setSampling(Adafruit_BME280::sensor_mode::MODE_NORMAL, Adafruit_BME280::sensor_sampling::SAMPLING_X2,
+                   Adafruit_BME280::sensor_sampling::SAMPLING_X16,
+                   Adafruit_BME280::sensor_sampling::SAMPLING_NONE,
+                   Adafruit_BME280::sensor_filter::FILTER_X4,
+                   Adafruit_BME280::standby_duration::STANDBY_MS_0_5);
+
     Serial.print(F("Temperature = "));
     Serial.print(bmp280.readTemperature());
     Serial.println(F(" *C"));

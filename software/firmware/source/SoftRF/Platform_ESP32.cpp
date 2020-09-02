@@ -1076,7 +1076,7 @@ static bool ESP32_Baro_setup()
     /* Pre-init 1st ESP32 I2C bus to stick on these pins */
     Wire.begin(SOC_GPIO_PIN_SDA, SOC_GPIO_PIN_SCL);
 
-  } else {
+  } else { //hw_info.model == SOFTRF_MODEL_PRIME_MK2
 
     /* Start from 1st I2C bus */
     Wire.begin(SOC_GPIO_PIN_TBEAM_SDA, SOC_GPIO_PIN_TBEAM_SCL);
@@ -1088,7 +1088,7 @@ static bool ESP32_Baro_setup()
 
 #if !defined(ENABLE_AHRS)
     /* Try out OLED I2C bus */
-    Wire.begin(TTGO_V2_OLED_PIN_SDA, TTGO_V2_OLED_PIN_SCL);
+    Wire1.begin(TTGO_V2_OLED_PIN_SDA, TTGO_V2_OLED_PIN_SCL);
     if (!Baro_probe())
       return false;
 
