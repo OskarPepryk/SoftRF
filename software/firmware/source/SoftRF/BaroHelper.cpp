@@ -244,9 +244,10 @@ static void ms5611_setup()
     delay(500);
 }
 
+//This will return new pressure only one in two calls.
 static float ms5611_altitude(float sealevelPressure)
 {
-  ms5611.Readout();
+  ms5611.ReadoutNonblocking();
   return pressure2alt(ms5611.GetPres(),sealevelPressure);
 }
 

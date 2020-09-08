@@ -26,10 +26,11 @@
 
 class MS5611 : public MS5xxx
 {
-	
+  protected:
+    virtual void compensationRoutine() override;
   public:
     MS5611(TwoWire *aWire);
-    virtual void Readout();
+
 };
 
 #endif
