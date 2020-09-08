@@ -60,7 +60,7 @@ MS5611 ms5611(&Wire);
 static unsigned long BaroTimeMarker = 0;
 static float prev_pressure_altitude = 0;
 
-#define VS_AVERAGING_FACTOR   20
+#define VS_AVERAGING_FACTOR   40
 #define VS_AVERAGING_PERIOD 2000
 static float Baro_VS[VS_AVERAGING_FACTOR];
 static float Baro_AltFilt[VS_AVERAGING_FACTOR];
