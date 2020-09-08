@@ -244,7 +244,8 @@ static void ms5611_setup()
 
 static float ms5611_altitude(float sealevelPressure)
 {
-    return pressure2alt(ms5611.GetPres(),sealevelPressure);
+  ms5611.Readout();
+  return pressure2alt(ms5611.GetPres(),sealevelPressure);
 }
 
 barochip_ops_t ms5611_ops = {
