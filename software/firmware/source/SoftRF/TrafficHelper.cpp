@@ -154,10 +154,15 @@ void ParseData()
     }
 
     if (protocol_decode && (*protocol_decode)((void *) RxBuffer, &ThisAircraft, &fo)) {
+      int i;
+
+      /* ignore if the received packet is from myself. */
+      if (fo.addr == ThisAircraft.addr)
+        return;
 
       fo.rssi = RF_last_rssi;
 
-      for (int i=0; i < MAX_TRACKING_OBJECTS; i++) {
+      for (i = 0; i < MAX_TRACKING_OBJECTS; i++) {
 
         if (Container[i].addr == fo.addr) {
           Container[i] = fo;
@@ -170,6 +175,12 @@ void ParseData()
             break;
           }
         }
+      }
+
+      /* detect and delte double IDs */
+      while (++i < MAX_TRACKING_OBJECTS) {
+        if (Container[i].addr == fo.addr)
+          Container[i] = EmptyFO;
       }
     }
 }
