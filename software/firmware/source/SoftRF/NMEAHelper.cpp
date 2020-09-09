@@ -118,27 +118,24 @@ void NMEA_loop()
 
   if (settings->nmea_s && ThisAircraft.pressure_altitude != 0.0 && isTimeToPGRMZ()) {
 
-    int altitude = constrain(
-            (int) (ThisAircraft.pressure_altitude * _GPS_FEET_PER_METER),
+    float altitude = constrain(
+            (ThisAircraft.pressure_altitude * _GPS_FEET_PER_METER),
             -1000, 60000);
 
-    int altitudePTAS1 = constrain(
-            (int) (ThisAircraft.pressure_altitude * _GPS_FEET_PER_METER + 2000),
-            0, 99999);
+    // int altitudePTAS1 = constrain(
+    //         (int) (ThisAircraft.pressure_altitude * _GPS_FEET_PER_METER + 2000),
+    //         0, 99999);
 
-    int vario = constrain(
-            (int) (ThisAircraft.vs * 0.009875 * 10.0 + 200), //to knots*10+200
-            0, 400);
+    // int vario = constrain(
+    //         (int) (ThisAircraft.vs * 0.009875 * 10.0 + 200), //to knots*10+200
+    //         0, 400);
 
-    // snprintf_P(NMEABuffer, sizeof(NMEABuffer), PSTR("$PGRMZ,%d,f,3*"),
-    //         altitude ); /* feet , 3D fix */
+    snprintf_P(NMEABuffer, sizeof(NMEABuffer), PSTR("$PGRMZ,%.2f,f,3*"),
+            altitude ); /* feet , 3D fix */
 
-    // NMEA_add_checksum(NMEABuffer, sizeof(NMEABuffer) - strlen(NMEABuffer));
 
-    // NMEA_Out((byte *) NMEABuffer, strlen(NMEABuffer), false);
-
-    snprintf_P(NMEABuffer, sizeof(NMEABuffer), PSTR("$PTAS1,%d,%d,%d,xxx*"),
-            vario, vario, altitudePTAS1 ); /* feet , 3D fix */
+    // snprintf_P(NMEABuffer, sizeof(NMEABuffer), PSTR("$PTAS1,%d,%d,%d,xxx*"),
+    //         vario, vario, altitudePTAS1 ); /* feet , 3D fix */
 
     NMEA_add_checksum(NMEABuffer, sizeof(NMEABuffer) - strlen(NMEABuffer));
 
