@@ -63,6 +63,7 @@ static float prev_pressure_altitude = 0;
 #define VS_AVERAGING_FACTOR   20
 #define VS_AVERAGING_PERIOD 2000
 static float Baro_VS[VS_AVERAGING_FACTOR];
+static float Baro_AltFilt[VS_AVERAGING_FACTOR];
 static int avg_ndx = 0;
 
 /* 4 baro sensor readings per second */
@@ -305,6 +306,7 @@ byte Baro_setup()
 
     for (int i=0; i<VS_AVERAGING_FACTOR; i++) {
       Baro_VS[i] = 0;
+      Baro_AltFilt[i] = 0;
     }
 
     return baro_chip->type;
@@ -322,16 +324,22 @@ void Baro_loop()
   if (baro_chip && isTimeToBaro()) {
 
     /* Draft of pressure altitude and vertical speed calculation */
-    ThisAircraft.pressure_altitude = baro_chip->altitude(1013.25);
-
-    Baro_VS[avg_ndx] = (ThisAircraft.pressure_altitude - prev_pressure_altitude) /
+    // ThisAircraft.pressure_altitude = baro_chip->altitude(1013.25);
+    float rawPressAltitude = baro_chip->altitude(1013.25);
+    
+    Baro_VS[avg_ndx] = (rawPressAltitude - prev_pressure_altitude) /
       (millis() - BaroTimeMarker) * 1000;  /* in m/s */
+    Baro_AltFilt[avg_ndx] = rawPressAltitude;
 
     ThisAircraft.vs = 0;
+    ThisAircraft.pressure_altitude = 0;
+
     for (int i=0; i<VS_AVERAGING_FACTOR; i++) {
       ThisAircraft.vs += Baro_VS[i];
+      ThisAircraft.pressure_altitude += Baro_AltFilt[i];
     }
     ThisAircraft.vs /= VS_AVERAGING_FACTOR;
+    ThisAircraft.pressure_altitude /= VS_AVERAGING_FACTOR;
 
     if (ThisAircraft.vs > -0.1 && ThisAircraft.vs < 0.1) {
       ThisAircraft.vs = 0;
@@ -339,7 +347,7 @@ void Baro_loop()
 
     ThisAircraft.vs *= (_GPS_FEET_PER_METER * 60.0) ; /* feet per minute */
 
-    prev_pressure_altitude = ThisAircraft.pressure_altitude;
+    prev_pressure_altitude = rawPressAltitude;
     BaroTimeMarker = millis();
     avg_ndx = (avg_ndx + 1) % VS_AVERAGING_FACTOR;
 
