@@ -340,7 +340,7 @@ void NMEA_Export()
               NMEA_Out((byte *) NMEABuffer, strlen(NMEABuffer), false);
 
               /* Most close traffic is treated as highest priority target */
-              if (distance < HP_distance && abs(alt_diff) < VERTICAL_VISIBILITY_RANGE) {
+              if (distance < HP_distance /*&& abs(alt_diff) < VERTICAL_VISIBILITY_RANGE*/) {
                 HP_bearing = bearing;
                 HP_alt_diff = alt_diff;
                 HP_alarm_level = alarm_level;
