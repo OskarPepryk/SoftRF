@@ -1,4 +1,19 @@
+
 # SoftRF &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; [![Join the chat at https://gitter.im/lyusupov/SoftRF](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/lyusupov/SoftRF?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) [![Build Status](https://travis-ci.org/lyusupov/SoftRF.png?branch=master)](https://travis-ci.org/lyusupov/SoftRF "Build Status") 
+This fork is my personal evolution of lyusupov's SoftRF. It focuses only on Prime Mk2 version and is only tested against that configuration.
+
+My changes include:
+* Support for both OLED and barometer module on I2C bus running simultaneously on pins 13/2. 
+* Working battery indication and power button while using the modules.
+* Added support for MS5611 barometric sensor.
+* Increased resolution and data rate of barometric altitude sent over UART. This is for quicker response of XCSoar variometer.
+* Changes of other developers that fix some of the problems that original author decided to ignore. Thanks to [CazYokoyama](https://github.com/CazYokoyama/SoftRF).
+
+This software is still work-in-progress. I don't recommend using it unless you can tolerate bugs in your application. Don't relay on SoftRF as collision avoidance system. If you have any development ideas or find any problems related to my changes, feel free to contact me.
+
+
+
+
 Multifunctional DIY IoT-based general aviation proximity awareness system.
 
 Features:
