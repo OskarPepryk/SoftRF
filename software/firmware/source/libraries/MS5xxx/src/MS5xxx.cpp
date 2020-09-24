@@ -259,8 +259,7 @@ bool MS5xxx::ReadoutNonblocking()
   case STATUS::READY:
   {
     // Serial.println(F("status = STATUS::READY;"));
-    compensationRoutine();
-    ret = true;
+    ret = compensationRoutine();
     //fallthrough
   }
   case STATUS::STANDBY:
@@ -274,10 +273,14 @@ bool MS5xxx::ReadoutNonblocking()
   }
   }
 
+  
+
   return ret;
 }
 
-void MS5xxx::compensationRoutine()
+//Returns true if data is valid
+//TODO Add error checking to I2C readout
+bool MS5xxx::compensationRoutine()
 {
   dT = D2 - C[5] * pow(2, 8);
   OFF = C[2] * pow(2, 17) + dT * C[4] / pow(2, 6);
@@ -305,4 +308,9 @@ void MS5xxx::compensationRoutine()
   OFF -= OFF2;
   SENS -= SENS2;
   P = (((D1 * SENS) / pow(2, 21) - OFF) / pow(2, 15));
+
+  if (P > 130e3 || P < 20e3)
+		return false;
+	else
+		return true;
 }

@@ -27,7 +27,7 @@
 class MS5611 : public MS5xxx
 {
   protected:
-    virtual void compensationRoutine() override;
+    virtual bool compensationRoutine() override;
   public:
     MS5611(TwoWire *aWire);
 

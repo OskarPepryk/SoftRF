@@ -73,7 +73,7 @@ class MS5xxx
 	unsigned long read_adc(unsigned char aCMD);
 	unsigned long read_adc_nonblocking();
   byte cmd_adc_conversion(unsigned char aCMD);
-  virtual void compensationRoutine();
+  virtual bool compensationRoutine();
 
   public:
     MS5xxx(TwoWire *aWire);

@@ -25,7 +25,8 @@ MS5611::MS5611(TwoWire *aWire) : MS5xxx(aWire){
 	setI2Caddr(I2C_MS5611);
 }
 
-void MS5611::compensationRoutine() {
+//Returns true if data is valid
+bool MS5611::compensationRoutine() {
 	// calculate 1st order pressure and temperature (MS5611 1st order algorithm)
 	dT=D2-C[5]*pow(2,8);
 	OFF=C[2]*pow(2,16)+dT*C[4]/pow(2,7);
@@ -49,5 +50,10 @@ void MS5611::compensationRoutine() {
 	OFF-=OFF2;
 	SENS-=SENS2;
 	P=(((D1*SENS)/pow(2,21)-OFF)/pow(2,15));	
+
+	if (P > 130e3 || P < 20e3)
+		return false;
+	else
+		return true;
 }
 
