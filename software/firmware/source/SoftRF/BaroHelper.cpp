@@ -60,7 +60,7 @@ MS5611 ms5611(&Wire);
 static unsigned long BaroTimeMarker = 0;
 static float prev_pressure_altitude = 0;
 
-#define VS_AVERAGING_FACTOR   20
+#define VS_AVERAGING_FACTOR   40
 #define VS_AVERAGING_PERIOD 2000
 static float Baro_VS[VS_AVERAGING_FACTOR];
 static float Baro_AltFilt[VS_AVERAGING_FACTOR];
@@ -244,10 +244,24 @@ static void ms5611_setup()
     delay(500);
 }
 
+//This will return new pressure only one in two calls.
 static float ms5611_altitude(float sealevelPressure)
 {
-  ms5611.Readout();
-  return pressure2alt(ms5611.GetPres(),sealevelPressure);
+  static float prevPressure = 1013e2;
+  float P;
+  bool status = ms5611.ReadoutNonblocking();
+  if (status)
+    {
+      P = ms5611.GetPres();
+      prevPressure = P;
+    } else
+    {
+      //If no new data is available or the data is invalid return
+      P = prevPressure;
+    }
+  
+  Serial.print(status); Serial.print(F(" P.Alt. = ")); Serial.println(P);
+  return pressure2alt(P,sealevelPressure);
 }
 
 barochip_ops_t ms5611_ops = {

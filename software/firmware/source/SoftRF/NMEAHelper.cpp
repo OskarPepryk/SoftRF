@@ -28,7 +28,7 @@
 
 #define ADDR_TO_HEX_STR(s, c) (s += ((c) < 0x10 ? "0" : "") + String((c), HEX))
 
-#define PGRMZ_INTERVAL 125
+#define PGRMZ_INTERVAL 200
 
 #if defined(NMEA_TCP_SERVICE)
 WiFiServer NmeaTCPServer(NMEA_TCP_PORT);

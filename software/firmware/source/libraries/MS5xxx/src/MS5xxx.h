@@ -44,16 +44,37 @@
 
 class MS5xxx
 {
+
   protected:
+  enum STATUS
+  {
+    STANDBY,
+    CONVERTING_D1,
+    CONVERTING_D2,
+    READY
+  };
+
+  STATUS status = STATUS::STANDBY;
+
 	unsigned int C[8];
 	double P;
 	double TEMP;
+  double dT;
+  double OFF;
+  double SENS;
+
 	char i2caddr;
 	TwoWire *_Wire;
+
+  unsigned long D1=0, D2=0;
+  unsigned long lastADCReadoutCmd = 0;
 	
 	unsigned char send_cmd(unsigned char aCMD);
 	unsigned long read_adc(unsigned char aCMD);
-	
+	unsigned long read_adc_nonblocking();
+  byte cmd_adc_conversion(unsigned char aCMD);
+  virtual bool compensationRoutine();
+
   public:
     MS5xxx(TwoWire *aWire);
     void setI2Caddr(char aAddr);
@@ -61,6 +82,7 @@ class MS5xxx
     
     void ReadProm();
     void Readout();
+    bool ReadoutNonblocking();
 
     unsigned int Calc_CRC4(unsigned char poly=0x30);
     unsigned int Read_CRC4();
@@ -70,6 +92,8 @@ class MS5xxx
     
     double GetTemp();
     double GetPres();
+
+
 };
 
 #endif

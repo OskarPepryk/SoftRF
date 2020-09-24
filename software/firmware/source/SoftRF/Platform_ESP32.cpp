@@ -71,9 +71,9 @@ Adafruit_NeoPixel strip = Adafruit_NeoPixel(PIX_NUM, SOC_GPIO_PIN_LED,
                               NEO_GRB + NEO_KHZ800);
 #endif /* USE_NEOPIXELBUS_LIBRARY */
 
-U8X8_SSD1306_128X64_NONAME_2ND_HW_I2C u8x8_ttgo(TTGO_V2_OLED_PIN_RST,
-                                                TTGO_V2_OLED_PIN_SCL,
-                                                TTGO_V2_OLED_PIN_SDA);
+U8X8_SSD1306_128X64_NONAME_HW_I2C u8x8_ttgo(TTGO_V2_OLED_PIN_RST,
+                                                SOC_GPIO_PIN_TBEAM_SCL,
+                                                SOC_GPIO_PIN_TBEAM_SDA);
 
 U8X8_SSD1306_128X64_NONAME_2ND_HW_I2C u8x8_heltec(HELTEC_OLED_PIN_RST,
                                                   HELTEC_OLED_PIN_SCL,
@@ -81,7 +81,7 @@ U8X8_SSD1306_128X64_NONAME_2ND_HW_I2C u8x8_heltec(HELTEC_OLED_PIN_RST,
 
 AXP20X_Class axp;
 
-static U8X8_SSD1306_128X64_NONAME_2ND_HW_I2C *u8x8 = NULL;
+static U8X8 *u8x8 = NULL;
 static TFT_eSPI *tft = NULL;
 
 static int esp32_board = ESP32_DEVKIT; /* default */
@@ -710,9 +710,9 @@ static byte ESP32_Display_setup()
         rval = DISPLAY_OLED_HELTEC;
       }
     } else {
-      Wire1.begin(TTGO_V2_OLED_PIN_SDA , TTGO_V2_OLED_PIN_SCL);
-      Wire1.beginTransmission(SSD1306_OLED_I2C_ADDR);
-      if (Wire1.endTransmission() == 0) {
+      Wire.begin(SOC_GPIO_PIN_TBEAM_SDA, SOC_GPIO_PIN_TBEAM_SCL);
+      Wire.beginTransmission(SSD1306_OLED_I2C_ADDR);
+      if (Wire.endTransmission() == 0) {
         u8x8 = &u8x8_ttgo;
         esp32_board = ESP32_TTGO_V2_OLED;
 
