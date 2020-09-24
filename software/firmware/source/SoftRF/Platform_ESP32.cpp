@@ -71,7 +71,7 @@ Adafruit_NeoPixel strip = Adafruit_NeoPixel(PIX_NUM, SOC_GPIO_PIN_LED,
                               NEO_GRB + NEO_KHZ800);
 #endif /* USE_NEOPIXELBUS_LIBRARY */
 
-U8X8_SSD1306_128X64_NONAME_2ND_HW_I2C u8x8_ttgo(TTGO_V2_OLED_PIN_RST,
+U8X8_SSD1306_128X64_NONAME_HW_I2C u8x8_ttgo(TTGO_V2_OLED_PIN_RST,
                                                 SOC_GPIO_PIN_TBEAM_SCL,
                                                 SOC_GPIO_PIN_TBEAM_SDA);
 
@@ -81,7 +81,7 @@ U8X8_SSD1306_128X64_NONAME_2ND_HW_I2C u8x8_heltec(HELTEC_OLED_PIN_RST,
 
 AXP20X_Class axp;
 
-static U8X8_SSD1306_128X64_NONAME_2ND_HW_I2C *u8x8 = NULL;
+static U8X8 *u8x8 = NULL;
 static TFT_eSPI *tft = NULL;
 
 static int esp32_board = ESP32_DEVKIT; /* default */
