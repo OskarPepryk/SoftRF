@@ -120,6 +120,8 @@ const char RX_text[]       = "RX";
 const char TX_text[]       = "TX";
 const char BAT_text[]      = "BAT";
 const char V_text[]        = "mV";
+const char GPS_text[]        = "GPS";
+const char ALT_text[]        = "ALT";
 
 static void IRAM_ATTR ESP32_PMU_Interrupt_handler() {
   portENTER_CRITICAL_ISR(&PMU_mutex);
@@ -746,7 +748,7 @@ static byte ESP32_Display_setup()
       u8x8->setFont(u8x8_font_chroma48medium8_r);
       u8x8->clear();
       u8x8->draw2x2String(1, 1, SoftRF_text);
-      u8x8->draw2x2String(1, 3, SoftRF_version);
+      // u8x8->draw2x2String(1, 3, SoftRF_version);
     }
 
   } else {  /* ESP32_TTGO_T_WATCH */
@@ -929,6 +931,11 @@ static void ESP32_Display_loop()
         itoa(ThisAircraft.addr & 0xFFFFFF, buf, 16);
         u8x8->drawString(0, 2, buf);
 
+        u8x8->drawString(0, 3, GPS_text);
+        
+        if (hw_info.baro != BARO_MODULE_NONE)
+          u8x8->drawString(0, 5, ALT_text);
+
         u8x8->drawString(8, 1, PROTOCOL_text);
 
         u8x8->drawString(8, 2, OLED_Protocol_ID[ThisAircraft.protocol]);
@@ -990,6 +997,17 @@ static void ESP32_Display_loop()
 
           u8x8->drawString(11, 4, buf);
           prev_tx_packets_counter = tx_packets_counter;
+
+        }
+        //Draw GNSS satellite count
+        itoa(gnss.satellites.value(), buf, 10);
+        u8x8->drawString(4, 3, buf);
+
+        //Draw pressure altitude and vertical speed if baro is connected.
+        if (hw_info.baro != BARO_MODULE_NONE)
+        {
+          sprintf(buf, "%dm %+.1f",(int)ThisAircraft.pressure_altitude, ThisAircraft.vs/(_GPS_FEET_PER_METER * 60.0));
+          u8x8->drawString(4, 5, buf);
         }
       }
     }
