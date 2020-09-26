@@ -57,8 +57,8 @@ Adafruit_MPL3115A2 mpl3115a2 = Adafruit_MPL3115A2();
 MS5611 ms5611(&Wire);
 #endif /* EXCLUDE_MS5611 */
 
-static unsigned long BaroTimeMarker = 0;
-static float prev_pressure_altitude = 0;
+static unsigned long BaroTimeMarker;
+static float prev_pressure_altitude;
 
 #define VS_AVERAGING_FACTOR   40
 #define VS_AVERAGING_PERIOD 2000
@@ -223,27 +223,6 @@ static float pressure2alt(float pressure, float seaLevelhPa)
   return (44330 * (1.0 - pow(pressure / seaLevelhPa, 0.1903)));
 }
 
-static void ms5611_setup()
-{
-    ms5611.Readout();
-
-    Serial.print(F("Temperature = "));
-    Serial.print(ms5611.GetTemp());
-    Serial.println(F(" *C"));
-    
-    Serial.print(F("Pressure = "));
-    float pressure = ms5611.GetPres();
-    Serial.print(pressure);
-    Serial.println(F(" Pa"));
-
-    Serial.print(F("Approx altitude = "));
-    Serial.print(pressure2alt(pressure,1013.25)); // this should be adjusted to your local forcase
-    Serial.println(F(" m"));
-    
-    Serial.println();
-    delay(500);
-}
-
 //This will return new pressure only one in two calls.
 static float ms5611_altitude(float sealevelPressure)
 {
@@ -260,8 +239,33 @@ static float ms5611_altitude(float sealevelPressure)
       P = prevPressure;
     }
   
-  Serial.print(status); Serial.print(F(" P.Alt. = ")); Serial.println(P);
+  // Serial.print(status); Serial.print(F(" P.Alt. = ")); Serial.println(P);
   return pressure2alt(P,sealevelPressure);
+}
+
+static void ms5611_setup()
+{
+    ms5611.Readout();
+
+    Serial.print(F("Temperature = "));
+    Serial.print(ms5611.GetTemp());
+    Serial.println(F(" *C"));
+    
+    Serial.print(F("Pressure = "));
+    float pressure = ms5611.GetPres();
+    Serial.print(pressure);
+    Serial.println(F(" Pa"));
+
+    Serial.print(F("Approx altitude = "));
+    Serial.print(ms5611_altitude(1013.25)); // start first pressure measurment
+    Serial.println(F(" m"));
+
+    delay(11); //Wait for new ADC sampling to end
+    ms5611_altitude(1013.25); // load first pressure measurment to the static variable
+    //TODO Move all of this initialization to MS56xx library and simplify SoftRF implementation
+    
+    Serial.println();
+    delay(500);
 }
 
 barochip_ops_t ms5611_ops = {
@@ -318,9 +322,10 @@ byte Baro_setup()
     prev_pressure_altitude = baro_chip->altitude(1013.25);
     BaroTimeMarker = millis();
 
+    //Initialize averaging arrays
     for (int i=0; i<VS_AVERAGING_FACTOR; i++) {
       Baro_VS[i] = 0;
-      Baro_AltFilt[i] = 0;
+      Baro_AltFilt[i] = prev_pressure_altitude;
     }
 
     return baro_chip->type;
