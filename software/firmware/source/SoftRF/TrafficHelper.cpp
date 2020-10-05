@@ -47,13 +47,15 @@ static int8_t Alarm_Distance(ufo_t *this_aircraft, ufo_t *fop)
   int8_t rval = ALARM_LEVEL_NONE;
   int alt_diff = (int) (fop->altitude - this_aircraft->altitude);
 
-  if (abs(alt_diff) < VERTICAL_SEPARATION) { /* no warnings if too high or too low */
-    if (distance < ALARM_ZONE_URGENT) {
-      rval = ALARM_LEVEL_URGENT;
-    } else if (distance < ALARM_ZONE_IMPORTANT) {
-      rval = ALARM_LEVEL_IMPORTANT;
-    } else if (distance < ALARM_ZONE_LOW) {
-      rval = ALARM_LEVEL_LOW;
+  if (fop->speed > 0) { /* only moving = airborne flight objects can get an alarm level > 0 */
+    if (abs(alt_diff) < VERTICAL_SEPARATION) { /* no warnings if too high or too low */
+      if (distance < ALARM_ZONE_URGENT) {
+        rval = ALARM_LEVEL_URGENT;
+      } else if (distance < ALARM_ZONE_IMPORTANT) {
+        rval = ALARM_LEVEL_IMPORTANT;
+      } else if (distance < ALARM_ZONE_LOW) {
+        rval = ALARM_LEVEL_LOW;
+      }
     }
   }
 

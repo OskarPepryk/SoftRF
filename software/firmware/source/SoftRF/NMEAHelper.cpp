@@ -254,6 +254,7 @@ void NMEA_Export()
     int bearing;
     int alt_diff;
     float distance;
+    float distance_absolut;
 
     int total_objects = 0;
     int alarm_level = ALARM_LEVEL_NONE;
@@ -264,7 +265,9 @@ void NMEA_Export()
     int HP_alt_diff = 0;
     int HP_alarm_level = ALARM_LEVEL_NONE;
     float HP_distance = 2147483647;
+    float HP_distance_absolut = 2147483647;
     uint32_t HP_addr = 0;
+    float HP_speed = 0.1; 
 
     bool has_Fix = isValidFix() || (settings->mode == SOFTRF_MODE_TXRX_TEST);
 
@@ -339,15 +342,19 @@ void NMEA_Export()
 
               NMEA_Out((byte *) NMEABuffer, strlen(NMEABuffer), false);
 
+              distance_absolut = sqrtf(distance * distance + alt_diff * alt_diff);
+
               /* Most close traffic is treated as highest priority target */
-              if (distance < HP_distance /*&& abs(alt_diff) < VERTICAL_VISIBILITY_RANGE*/) {
+              if (distance_absolut < HP_distance_absolut || alarm_level > HP_alarm_level ) {
+              /*if (distance < HP_distance) {*/
                 HP_bearing = bearing;
                 HP_alt_diff = alt_diff;
                 HP_alarm_level = alarm_level;
                 HP_distance = distance;
+                HP_distance_absolut = distance_absolut;
                 HP_addr = Container[i].addr;
+                HP_speed = Container[i].speed;  /* ground speed in knots */
               }
-
             }
           }
         }
@@ -367,7 +374,8 @@ void NMEA_Export()
                 settings->txpower == RF_TX_POWER_OFF ? TX_STATUS_OFF : TX_STATUS_ON,
                 GNSS_STATUS_3D_MOVING,
                 POWER_STATUS_GOOD, HP_alarm_level, rel_bearing,
-                ALARM_TYPE_AIRCRAFT, HP_alt_diff, (int) HP_distance, HP_addr
+                HP_speed > 0.0 ? ALARM_TYPE_AIRCRAFT : ALARM_TYPE_TRAFFIC,
+                HP_alt_diff, (int) HP_distance, HP_addr
                 PFLAU_EXT1_ARGS );
       } else {
         snprintf_P(NMEABuffer, sizeof(NMEABuffer),
