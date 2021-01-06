@@ -1,6 +1,6 @@
 /*
  * WebHelper.cpp
- * Copyright (C) 2016-2020 Linar Yusupov
+ * Copyright (C) 2016-2021 Linar Yusupov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -95,7 +95,7 @@ static const char about_html[] PROGMEM = "<html>\
 <tr><th align=left>Bodmer</th><td align=left>TFT library</td></tr>\
 </table>\
 <hr>\
-Copyright (C) 2019-2020 &nbsp;&nbsp;&nbsp; Linar Yusupov\
+Copyright (C) 2019-2021 &nbsp;&nbsp;&nbsp; Linar Yusupov\
 </body>\
 </html>";
 
@@ -189,7 +189,7 @@ void handleRoot() {
 
 void handleSettings() {
 
-  size_t size = 7040;
+  size_t size = 7160;
   char *offset;
   size_t len = 0;
   char *Settings_temp = (char *) malloc(size);
@@ -365,6 +365,8 @@ void handleSettings() {
 <option %s value='%d'>UK (869.52 MHz)</option>\
 <option %s value='%d'>AU (921 MHz)</option>\
 <option %s value='%d'>IN (866 MHz)</option>\
+<option %s value='%d'>KR (920.9 MHz)</option>\
+<option %s value='%d'>IL (916.2 MHz)</option>\
 </select>\
 </td>\
 </tr>\
@@ -433,6 +435,8 @@ void handleSettings() {
   (settings->s.band == RF_BAND_UK ? "selected" : ""), RF_BAND_UK,
   (settings->s.band == RF_BAND_AU ? "selected" : ""), RF_BAND_AU,
   (settings->s.band == RF_BAND_IN ? "selected" : ""), RF_BAND_IN,
+  (settings->s.band == RF_BAND_KR ? "selected" : ""), RF_BAND_KR,
+  (settings->s.band == RF_BAND_IL ? "selected" : ""), RF_BAND_IL,
   (settings->s.aircraft_type == AIRCRAFT_TYPE_GLIDER ? "selected" : ""),  AIRCRAFT_TYPE_GLIDER,
   (settings->s.aircraft_type == AIRCRAFT_TYPE_TOWPLANE ? "selected" : ""),  AIRCRAFT_TYPE_TOWPLANE,
   (settings->s.aircraft_type == AIRCRAFT_TYPE_POWERED ? "selected" : ""),  AIRCRAFT_TYPE_POWERED,
@@ -962,7 +966,7 @@ void handleStatus() {
   <!-- <td align=right><img src='/logo.png'></td> --></tr>\
 </table>\
 <table width=100%%>\
-<tr><th align=left>Device Id</th><td align=right>%X</td></tr>\
+<tr><th align=left>Device Id</th><td align=right>%06X</td></tr>\
 <tr><th align=left>Software Version</th><td align=right>%s&nbsp;&nbsp;%s</td></tr>\
 <tr><th align=left>Uptime</th><td align=right>%02d:%02d:%02d</td></tr>\
 <tr><th align=left>Free memory</th><td align=right>%u</td></tr>\
@@ -1048,7 +1052,7 @@ void handleStatus() {
 <tr><th align=left>Connection status</th><td align=right>%s connected</td></tr>\
 <tr><th align=left>Data type</th><td align=right>%s %s %s</td></tr>\
 <tr><th align=left>GNSS fix</th><td align=right>%s</td></tr>\
-<tr><th align=left>Slave Id</th><td align=right>%X</td></tr>\
+<tr><th align=left>Slave Id</th><td align=right>%06X</td></tr>\
 <tr><th align=left>RF protocol</th><td align=right>%s</td></tr>\
 </table>\
 <table width=100%%>\

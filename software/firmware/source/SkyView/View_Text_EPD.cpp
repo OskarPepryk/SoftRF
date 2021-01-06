@@ -1,6 +1,6 @@
 /*
  * View_Text_EPD.cpp
- * Copyright (C) 2019-2020 Linar Yusupov
+ * Copyright (C) 2019-2021 Linar Yusupov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -258,7 +258,7 @@ static void EPD_Draw_Text()
     }
     while (display->nextPage());
 
-    display->hibernate();
+    display->powerOff();
   }
 }
 
@@ -304,7 +304,7 @@ void EPD_text_Draw_Message(const char *msg1, const char *msg2)
     }
     while (display->nextPage());
 
-    display->hibernate();
+    display->powerOff();
   }
 }
 

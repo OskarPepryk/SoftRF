@@ -1,6 +1,6 @@
 /*
  * UAT_Receiver(.ino) firmware
- * Copyright (C) 2019-2020 Linar Yusupov
+ * Copyright (C) 2019-2021 Linar Yusupov
  *
  * Author: Linar Yusupov, linar.r.yusupov@gmail.com
  *
@@ -21,15 +21,15 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "SoCHelper.h"
-#include "TimeHelper.h"
-#include "LEDHelper.h"
-#include "RFHelper.h"
-#include "EEPROMHelper.h"
-#include "GDL90Helper.h"
-#include "D1090Helper.h"
-#include "BaroHelper.h"
-#include "BatteryHelper.h"
+#include "src/system/SoC.h"
+#include "src/system/Time.h"
+#include "src/driver/LED.h"
+#include "src/driver/RF.h"
+#include "src/driver/EEPROM.h"
+#include "src/protocol/data/GDL90.h"
+#include "src/protocol/data/D1090.h"
+#include "src/driver/Baro.h"
+#include "src/driver/Battery.h"
 
 #include "EasyLink.h"
 
@@ -217,7 +217,7 @@ void setup() {
   Serial.print(SoC->name);
   Serial.print(F(" FW.REV: " SOFTRF_FIRMWARE_VERSION " DEV.ID: "));
   Serial.println(String(SoC->getChipId(), HEX));
-  Serial.println(F("Copyright (C) 2015-2020 Linar Yusupov. All rights reserved."));
+  Serial.println(F("Copyright (C) 2015-2021 Linar Yusupov. All rights reserved."));
   Serial.flush();
 
   EEPROM_setup();
@@ -233,6 +233,8 @@ void setup() {
 
   Battery_setup();
 
+  LED_setup();
+
   /*
    * Display 'U' (UAT) on OLED for Rx only modes.
    */
@@ -240,8 +242,14 @@ void setup() {
 
   Serial.println("Receiver mode.");
 
+  if (hw_info.display != DISPLAY_NONE)  delay(3000);
+
   myLink.begin(EasyLink_Phy_Custom);
   Serial.println("Listening...");
+
+  hw_info.rf = RF_IC_CC13XX;
+
+  SoC->post_init();
 
   SoC->WDT_setup();
 }
@@ -263,6 +271,9 @@ void loop() {
   // Show status info on tiny OLED display
   SoC->Display_loop();
 
+  // battery status LED
+  LED_loop();
+
   SoC->loop();
 
   Battery_loop();
@@ -272,13 +283,13 @@ void loop() {
   yield();
 }
 
-void shutdown(const char *msg)
+void shutdown(int reason)
 {
   SoC->WDT_fini();
 
-  SoC->Display_fini(msg);
+  SoC->Display_fini(reason);
 
   SoC->Button_fini();
 
-  SoC_fini();
+  SoC_fini(reason);
 }

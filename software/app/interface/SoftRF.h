@@ -1,6 +1,6 @@
 /*
  * SoftRF.h
- * Copyright (C) 2019-2020 Linar Yusupov
+ * Copyright (C) 2019-2021 Linar Yusupov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -71,7 +71,7 @@
         Legacy    On, Off
         Sensors   On, Off
 
-  NMEA  output:   Serial, "Bluetooth" (assigned to USB CDC on STM32)
+  NMEA  output:   Serial, USB, Bluetooth
   GDL90 output:   Off
   D1090 output:   Off
 
@@ -96,7 +96,7 @@
         Legacy    On
         Sensors   On
 
-  NMEA  output:   "Bluetooth" (USB)
+  NMEA  output:   USB
 
   Stealth:        Off
   No track:       Off
@@ -151,7 +151,9 @@ enum
 	SOFTRF_BAND_RU   = 5, /* 868.8 MHz band */
 	SOFTRF_BAND_CN   = 6, /* 470 MHz band */
 	SOFTRF_BAND_UK   = 7, /* 869.52 MHz band */
-	SOFTRF_BAND_IN   = 8  /* 866.0 MHz band */
+	SOFTRF_BAND_IN   = 8, /* 866.0 MHz band */
+	SOFTRF_BAND_IL   = 9, /* 916.2 MHz band */
+	SOFTRF_BAND_KR   = 10 /* 920.9 MHz band */
 };
 
 enum
@@ -233,6 +235,7 @@ enum
 	SOFTRF_NMEA_OUTPUT_UART,
 	SOFTRF_NMEA_OUTPUT_UDP,
 	SOFTRF_NMEA_OUTPUT_TCP,
+	SOFTRF_NMEA_OUTPUT_USB,
 	SOFTRF_NMEA_OUTPUT_BLUETOOTH
 };
 
@@ -242,6 +245,7 @@ enum
 	SOFTRF_GDL90_UART,
 	SOFTRF_GDL90_UDP,
 	SOFTRF_GDL90_TCP,
+	SOFTRF_GDL90_USB,
 	SOFTRF_GDL90_BLUETOOTH
 };
 
@@ -251,6 +255,7 @@ enum
 	SOFTRF_D1090_UART,
 	SOFTRF_D1090_UDP,
 	SOFTRF_D1090_TCP,
+	SOFTRF_D1090_USB,
 	SOFTRF_D1090_BLUETOOTH
 };
 

@@ -1,6 +1,6 @@
 /*
  * UATbridge(.ino) firmware
- * Copyright (C) 2019-2020 Linar Yusupov
+ * Copyright (C) 2019-2021 Linar Yusupov
  *
  * Author: Linar Yusupov, linar.r.yusupov@gmail.com
  *
@@ -21,18 +21,18 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "SoCHelper.h"
-#include "TimeHelper.h"
-#include "LEDHelper.h"
-#include "GNSSHelper.h"
-#include "RFHelper.h"
-#include "EEPROMHelper.h"
-#include "BaroHelper.h"
-#include "TrafficHelper.h"
-#include "BatteryHelper.h"
+#include "src/system/SoC.h"
+#include "src/system/Time.h"
+#include "src/driver/LED.h"
+#include "src/driver/GNSS.h"
+#include "src/driver/RF.h"
+#include "src/driver/EEPROM.h"
+#include "src/driver/Baro.h"
+#include "src/TrafficHelper.h"
+#include "src/driver/Battery.h"
 
 #include "EasyLink.h"
-#include "Protocol_UAT978.h"
+#include "src/protocol/radio/UAT978.h"
 
 #include <uat.h>
 #include <fec/char.h>
@@ -223,7 +223,7 @@ void setup() {
   Serial.print(SoC->name);
   Serial.print(F(" FW.REV: " SOFTRF_FIRMWARE_VERSION " DEV.ID: "));
   Serial.println(String(SoC->getChipId(), HEX));
-  Serial.println(F("Copyright (C) 2015-2020 Linar Yusupov. All rights reserved."));
+  Serial.println(F("Copyright (C) 2015-2021 Linar Yusupov. All rights reserved."));
   Serial.flush();
 
   EEPROM_setup();
@@ -264,6 +264,8 @@ void setup() {
 
   Battery_setup();
 
+  LED_setup();
+
   /*
    * Display 'U' (UAT) on OLED for Rx only modes.
    * Indicate Tx protocol otherwise
@@ -276,6 +278,8 @@ void setup() {
   RF_loop();
 
   Serial.println(F("Listening..."));
+
+  SoC->post_init();
 
   SoC->WDT_setup();
 }
@@ -436,6 +440,9 @@ void loop() {
   // Show status info on tiny OLED display
   SoC->Display_loop();
 
+  // battery status LED
+  LED_loop();
+
   SoC->loop();
 
   Battery_loop();
@@ -445,7 +452,7 @@ void loop() {
   yield();
 }
 
-void shutdown(const char *msg)
+void shutdown(int reason)
 {
   SoC->WDT_fini();
 
@@ -453,7 +460,7 @@ void shutdown(const char *msg)
 
   SoC->swSer_enableRx(false);
 
-  SoC->Display_fini(msg);
+  SoC->Display_fini(reason);
 
   if (hw_info.rf == RF_IC_CC13XX) {
     EasyLink_abort();
@@ -463,5 +470,5 @@ void shutdown(const char *msg)
 
   SoC->Button_fini();
 
-  SoC_fini();
+  SoC_fini(reason);
 }

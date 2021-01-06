@@ -1,6 +1,6 @@
 /*
  * WiFiHelper.h
- * Copyright (C) 2016-2020 Linar Yusupov
+ * Copyright (C) 2016-2021 Linar Yusupov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,6 +26,13 @@
 #include "SoCHelper.h"
 
 #define UDP_PACKET_BUFSIZE  256
+#define WIFI_DHCP_LEASE_HRS 8
+
+enum
+{
+    WIFI_PARAM_TX_POWER,
+    WIFI_PARAM_DHCP_LEASE_TIME
+};
 
 enum
 {

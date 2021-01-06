@@ -1,6 +1,6 @@
 /*
  * WebHelper.cpp
- * Copyright (C) 2016-2020 Linar Yusupov
+ * Copyright (C) 2016-2021 Linar Yusupov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -91,7 +91,7 @@ static const char about_html[] PROGMEM = "<html>\
 <tr><th align=left>Evandro Copercini</th><td align=left>ESP32 BT SPP library</td></tr>\
 </table>\
 <hr>\
-Copyright (C) 2019-2020 &nbsp;&nbsp;&nbsp; Linar Yusupov\
+Copyright (C) 2019-2021 &nbsp;&nbsp;&nbsp; Linar Yusupov\
 </body>\
 </html>";
 
@@ -459,7 +459,7 @@ void handleRoot() {
   <!-- <td align=right><img src='/logo.png'></td> --></tr>\
  </table>\
  <table width=100%%>\
-  <tr><th align=left>Device Id</th><td align=right>%X</td></tr>\
+  <tr><th align=left>Device Id</th><td align=right>%06X</td></tr>\
   <tr><th align=left>Software Version</th><td align=right>%s&nbsp;&nbsp;%s</td></tr>\
   <tr><th align=left>Uptime</th><td align=right>%02d:%02d:%02d</td></tr>\
   <tr><th align=left>Free memory</th><td align=right>%u</td></tr>\

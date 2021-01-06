@@ -77,14 +77,30 @@
 #endif
 #endif
 
+#if defined(ARDUINO_ARCH_NRF52)
+
+#ifdef __cplusplus
+#include <SPI.h>
+extern SPIClass SPI0;
+#define SPI SPI0
+#endif
+
+#ifdef CFG_DEBUG
+#undef CFG_DEBUG
+#endif
+
+#endif /* ARDUINO_ARCH_NRF52 */
+
 #if defined(CFG_eu868)
 
 enum _dr_eu868_t { DR_SF12=0, DR_SF11, DR_SF10, DR_SF9, DR_SF8, DR_SF7, DR_SF7B, DR_FSK, DR_NONE };
 
 #endif /* CFG_eu868 */
 
-#if defined(ESP32) || defined(ESP8266)
+#if defined(ESP32) || defined(ESP8266) || defined(__ASR6501__)
 #include <pgmspace.h>
+#elif defined(ARDUINO_ARCH_NRF52)
+#include <avr/pgmspace.h>
 #endif
 
 #endif // _lmic_arduino_hal_config_h_

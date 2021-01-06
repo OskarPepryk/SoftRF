@@ -1,0 +1,7 @@
+{
+    "board": "esp32:esp32:esp32",
+    "configuration": "PSRAM=enabled,PartitionScheme=min_spiffs,CPUFreq=80,FlashMode=dio,FlashFreq=80,FlashSize=4M,UploadSpeed=921600,DebugLevel=none",
+    "sketch": "software/firmware/source/SoftRF/SoftRF.ino",
+    "output": "software/firmware/source/SoftRF/build",
+    "port": "/dev/ttyUSB0"
+}

@@ -19,3 +19,13 @@ Areas where contributions are welcomed by the project's developer:
     - create and maintain data logger (in IGC format) for [SkyView EZ](https://github.com/lyusupov/SoftRF/wiki/SkyView-EZ)
     - create and maintain settings menu UI for [SkyView Pi](https://github.com/lyusupov/SoftRF/wiki/SkyView-Pi) and/or
         - connected [SoftRF Dongle](https://github.com/lyusupov/SoftRF/wiki/Dongle-Edition)
+    - design, produce and sell for less than 20 USD a "BoosterPack" for TI SensorTag LPSTK-CC1352R that contains
+        - GNSS
+        - display
+        - Wi-Fi/BT/LE/USB adapter
+        - pressure sensor
+    - create and maintain cross-platform (Android and iOS) smartphone/tablet app to monitor status and change settings of the following SoftRF Editions
+        - Badge
+        - [Uni](https://github.com/lyusupov/SoftRF/wiki/Uni-Edition)
+        - [Dongle](https://github.com/lyusupov/SoftRF/wiki/Dongle-Edition)
+        - Mini

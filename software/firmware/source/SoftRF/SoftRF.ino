@@ -1,6 +1,6 @@
 /*
  * SoftRF(.ino) firmware
- * Copyright (C) 2016-2020 Linar Yusupov
+ * Copyright (C) 2016-2021 Linar Yusupov
  *
  * Author: Linar Yusupov, linar.r.yusupov@gmail.com
  *
@@ -60,38 +60,38 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "OTAHelper.h"
-#include "TimeHelper.h"
-#include "LEDHelper.h"
-#include "GNSSHelper.h"
-#include "RFHelper.h"
-#include "SoundHelper.h"
-#include "EEPROMHelper.h"
-#include "BatteryHelper.h"
-#include "MAVLinkHelper.h"
-#include "GDL90Helper.h"
-#include "NMEAHelper.h"
-#include "D1090Helper.h"
-#include "SoCHelper.h"
-#include "WiFiHelper.h"
-#include "WebHelper.h"
-#include "BaroHelper.h"
-#include "TTNHelper.h"
-#include "TrafficHelper.h"
+#include "src/system/OTA.h"
+#include "src/system/Time.h"
+#include "src/driver/LED.h"
+#include "src/driver/GNSS.h"
+#include "src/driver/RF.h"
+#include "src/driver/Sound.h"
+#include "src/driver/EEPROM.h"
+#include "src/driver/Battery.h"
+#include "src/protocol/data/MAVLink.h"
+#include "src/protocol/data/GDL90.h"
+#include "src/protocol/data/NMEA.h"
+#include "src/protocol/data/D1090.h"
+#include "src/system/SoC.h"
+#include "src/driver/WiFi.h"
+#include "src/ui/Web.h"
+#include "src/driver/Baro.h"
+#include "src/TTNHelper.h"
+#include "src/TrafficHelper.h"
 
 #if defined(ENABLE_AHRS)
-#include "AHRSHelper.h"
+#include "src/driver/AHRS.h"
 #endif /* ENABLE_AHRS */
 
 #if LOGGER_IS_ENABLED
-#include "LogHelper.h"
+#include "src/system/Log.h"
 #endif /* LOGGER_IS_ENABLED */
 
 #define DEBUG 0
 #define DEBUG_TIMING 0
 
-#define isTimeToDisplay() (millis() - LEDTimeMarker > 1000)
-#define isTimeToExport() (millis() - ExportTimeMarker > 1000)
+#define isTimeToDisplay() (millis() - LEDTimeMarker     > 1000)
+#define isTimeToExport()  (millis() - ExportTimeMarker  > 1000)
 
 ufo_t ThisAircraft;
 
@@ -121,6 +121,8 @@ void setup()
 #if defined(USBD_USE_CDC) && !defined(DISABLE_GENERIC_SERIALUSB)
   /* Let host's USB and console drivers to warm-up */
   delay(2000);
+#elif defined(USE_TINYUSB) && defined(USBCON)
+  for (int i=0; i < 20; i++) {if (Serial) break; else delay(100);}
 #endif
 
 #if LOGGER_IS_ENABLED
@@ -132,7 +134,7 @@ void setup()
   Serial.print(SoC->name);
   Serial.print(F(" FW.REV: " SOFTRF_FIRMWARE_VERSION " DEV.ID: "));
   Serial.println(String(SoC->getChipId(), HEX));
-  Serial.println(F("Copyright (C) 2015-2020 Linar Yusupov. All rights reserved."));
+  Serial.println(F("Copyright (C) 2015-2021 Linar Yusupov. All rights reserved."));
   Serial.flush();
 
   if (resetInfo) {
@@ -149,13 +151,6 @@ void setup()
   ThisAircraft.addr = SoC->getChipId() & 0x00FFFFFF;
 
   hw_info.rf = RF_setup();
-
-  if (hw_info.model    == SOFTRF_MODEL_PRIME_MK2 &&
-      hw_info.revision == 2                      &&
-      RF_SX12XX_RST_is_connected)
-  {
-    hw_info.revision = 5;
-  }
 
   delay(100);
 
@@ -189,8 +184,12 @@ void setup()
 
   WiFi_setup();
 
-  if (SoC->Bluetooth) {
-     SoC->Bluetooth->setup();
+  if (SoC->USB_ops) {
+     SoC->USB_ops->setup();
+  }
+
+  if (SoC->Bluetooth_ops) {
+     SoC->Bluetooth_ops->setup();
   }
 
   OTA_setup();
@@ -225,6 +224,8 @@ void setup()
     break;
   }
 
+  SoC->post_init();
+
   SoC->WDT_setup();
 }
 
@@ -250,9 +251,11 @@ void loop()
     bridge();
     break;
 #endif /* EXCLUDE_WIFI */
+#if !defined(EXCLUDE_WATCHOUT_MODE)
   case SOFTRF_MODE_WATCHOUT:
     watchout();
     break;
+#endif /* EXCLUDE_WATCHOUT_MODE */
   case SOFTRF_MODE_NORMAL:
   default:
     normal();
@@ -280,6 +283,18 @@ void loop()
 
   SoC->loop();
 
+  if (SoC->Bluetooth_ops) {
+    SoC->Bluetooth_ops->loop();
+  }
+
+  if (SoC->USB_ops) {
+    SoC->USB_ops->loop();
+  }
+
+  if (SoC->UART_ops) {
+     SoC->UART_ops->loop();
+  }
+
   Battery_loop();
 
   SoC->Button_loop();
@@ -287,7 +302,7 @@ void loop()
   yield();
 }
 
-void shutdown(const char *msg)
+void shutdown(int reason)
 {
   SoC->WDT_fini();
 
@@ -297,19 +312,27 @@ void shutdown(const char *msg)
 
   Web_fini();
 
+  if (SoC->Bluetooth_ops) {
+     SoC->Bluetooth_ops->fini();
+  }
+
+  if (SoC->USB_ops) {
+     SoC->USB_ops->fini();
+  }
+
   WiFi_fini();
 
   if (settings->mode != SOFTRF_MODE_UAV) {
     GNSS_fini();
   }
 
-  SoC->Display_fini(msg);
+  SoC->Display_fini(reason);
 
   RF_Shutdown();
 
   SoC->Button_fini();
 
-  SoC_fini();
+  SoC_fini(reason);
 }
 
 void normal()
@@ -378,9 +401,9 @@ void normal()
 
   if (isTimeToExport()) {
     NMEA_Export();
+    GDL90_Export();
 
     if (isValidFix()) {
-      GDL90_Export();
       D1090_Export();
     }
     ExportTimeMarker = millis();
@@ -468,6 +491,7 @@ void bridge()
 }
 #endif /* EXCLUDE_WIFI */
 
+#if !defined(EXCLUDE_WATCHOUT_MODE)
 void watchout()
 {
   bool success;
@@ -494,6 +518,7 @@ void watchout()
     LEDTimeMarker = millis();
   }
 }
+#endif /* EXCLUDE_WATCHOUT_MODE */
 
 #if !defined(EXCLUDE_TEST_MODE)
 

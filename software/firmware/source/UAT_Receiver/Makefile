@@ -1,6 +1,6 @@
 #
 # Makefile
-# Copyright (C) 2019-2020 Linar Yusupov
+# Copyright (C) 2019-2021 Linar Yusupov
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -26,6 +26,7 @@ BINDIR        = /tmp/energia
 ENERGIA       = energia
 LN            = ln -s
 RM            = rm -f
+CP            = cp -r
 TC_PATH       = $(HOME)/.energia15/packages/energia/tools/arm-none-eabi-gcc/4.8.4-20140725/bin
 OBJCOPY       = arm-none-eabi-objcopy -O ihex -R .empty -R .vtable \
                  -R .dmaSpi0RxControlTableEntry -R .dmaSpi0TxControlTableEntry \
@@ -39,14 +40,20 @@ CPPS          := Platform_CC13XX.cpp SoCHelper.cpp \
                  GDL90Helper.cpp BaroHelper.cpp TrafficHelper.cpp \
                  NMEAHelper.cpp D1090Helper.cpp MAVLinkHelper.cpp \
                  LEDHelper.cpp BatteryHelper.cpp EEPROMHelper.cpp \
-                 Platform_ESP8266.cpp Platform_ESP32.cpp \
-                 Platform_RPi.cpp Platform_STM32.cpp Platform_PSoC4.cpp \
+                 Platform_ESP8266.cpp Platform_ESP32.cpp Platform_RPi.cpp \
+                 Platform_STM32.cpp Platform_PSoC4.cpp  Platform_nRF52.cpp \
                  JSONHelper.cpp BluetoothHelper.cpp SoundHelper.cpp \
                  TimeHelper.cpp WebHelper.cpp WiFiHelper.cpp OTAHelper.cpp
 
-HFILES        := SoftRF.h $(CPPS:.cpp=.h)
+# HFILES      := SoftRF.h $(CPPS:.cpp=.h)
 
-links:  $(foreach f, $(CPPS) $(HFILES), link-file-$(f))
+HFILES        := SoftRF.h
+
+# links:  $(foreach f, $(CPPS) $(HFILES), link-file-$(f))
+
+links:  $(foreach f, $(HFILES), link-file-$(f))
+				@if [ -e src ]; then echo "src directory is already present"; \
+				  else echo "Making copy of src directory" ; $(CP) $(SOFTRF_DIR)/src . ; fi
 
 link-file-%: $(SOFTRF_DIR)/%
 				@if [ -e $* ]; then echo $* "symlink is already present"; \
@@ -66,4 +73,5 @@ ihex:
 				$(TC_PATH)/$(OBJCOPY) $(BINDIR)/$(BIN_ELF) $(BINDIR)/$(BIN_IHEX)
 				$(SED) $(BINDIR)/$(BIN_IHEX)
 clean:
-				$(RM) $(CPPS) $(HFILES)
+				$(RM) $(HFILES)
+				$(RM) -r src

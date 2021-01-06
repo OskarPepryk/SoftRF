@@ -1,6 +1,6 @@
 /*
  * Platform_ESP32.cpp
- * Copyright (C) 2019-2020 Linar Yusupov
+ * Copyright (C) 2019-2021 Linar Yusupov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -161,12 +161,19 @@ static void ESP32_fini()
 
   esp_wifi_stop();
   esp_bt_controller_disable();
+  SPI.end();
 
-  esp_sleep_enable_ext0_wakeup((gpio_num_t) mode_button_pin, 0); // 1 = High, 0 = Low
-
-#if USE_IP5306_WORKAROUND
-  esp_sleep_enable_timer_wakeup(TIME_TO_SLEEP * uS_TO_S_FACTOR);
-#endif /* USE_IP5306_WORKAROUND */
+  /*
+   * manually apply this fix onto Arduino Core for ESP32:
+   * https://github.com/espressif/arduino-esp32/pull/4272
+   * to put SD card into idle state
+   *
+   *  SkyView EZ sleep current (from 3.7V battery source):
+   *  ---------------------------------------------------
+   *  SD card in  -            0.2 mA
+   *  SD card out -            0.1 mA
+   */
+  esp_sleep_enable_ext1_wakeup(1ULL << mode_button_pin, ESP_EXT1_WAKEUP_ALL_LOW);
 
 //  Serial.println("Going to sleep now");
 //  Serial.flush();
@@ -180,30 +187,6 @@ static void ESP32_setup()
   uint8_t null_mac[6] = {0};
 
   ++bootCount;
-
-#if USE_IP5306_WORKAROUND
-  esp_sleep_wakeup_cause_t wakeup_reason = esp_sleep_get_wakeup_cause();
-
-  if (wakeup_reason == ESP_SLEEP_WAKEUP_TIMER)
-  {
-//    Serial.begin(38400); Serial.println();
-//    Serial.println("Boot number: " + String(bootCount));
-
-//    pinMode(SOC_GPIO_PIN_LED_T5S, OUTPUT);
-//    digitalWrite(SOC_GPIO_PIN_LED_T5S, LOW);
-
-    WiFi.mode(WIFI_AP);
-    WiFi.softAP("DEEP_SLEEP_TEST","88888888");
-
-    delay(600);
-
-//    digitalWrite(SOC_GPIO_PIN_LED_T5S, HIGH);
-//    pinMode(SOC_GPIO_PIN_LED_T5S, INPUT);
-
-    ESP32_fini();
-    /* should never reach this point */
-  }
-#endif /* USE_IP5306_WORKAROUND */
 
   ret = esp_efuse_mac_get_custom(efuse_mac);
   if (ret != ESP_OK) {
@@ -325,6 +308,7 @@ static bool ESP32_WiFi_hostname(String aHostname)
 static void ESP32_swSer_begin(unsigned long baud)
 {
   SerialInput.begin(baud, SERIAL_8N1, SOC_GPIO_PIN_GNSS_RX, SOC_GPIO_PIN_GNSS_TX);
+  SerialInput.setRxBufferSize(baud / 10); /* 1 second */
 }
 
 static void ESP32_swSer_enableRx(boolean arg)
@@ -793,6 +777,8 @@ void handleEvent(AceButton* button, uint8_t eventType,
 
   switch (eventType) {
     case AceButton::kEventPressed:
+      break;
+    case AceButton::kEventReleased:
       if (button == &button_mode) {
         EPD_Mode();
       } else if (button == &button_up) {
@@ -800,8 +786,6 @@ void handleEvent(AceButton* button, uint8_t eventType,
       } else if (button == &button_down) {
         EPD_Down();
       }
-      break;
-    case AceButton::kEventReleased:
       break;
     case AceButton::kEventLongPressed:
       if (button == &button_mode) {
@@ -830,7 +814,7 @@ static void ESP32_Button_setup()
   int mode_button_pin = settings->adapter == ADAPTER_TTGO_T5S ?
                         SOC_BUTTON_MODE_T5S : SOC_BUTTON_MODE_DEF;
 
-  // Button(s) uses external pull up register.
+  // Button(s) uses external pull up resistor.
   pinMode(mode_button_pin, INPUT);
 
   button_mode.init(mode_button_pin);
@@ -850,7 +834,7 @@ static void ESP32_Button_setup()
 
   if (settings->adapter == ADAPTER_TTGO_T5S) {
 
-    // Button(s) uses external pull up register.
+    // Button(s) uses external pull up resistor.
     pinMode(SOC_BUTTON_UP_T5S,   INPUT);
     pinMode(SOC_BUTTON_DOWN_T5S, INPUT);
 

@@ -1,6 +1,6 @@
 /*
  * SoftRF.h
- * Copyright (C) 2016-2020 Linar Yusupov
+ * Copyright (C) 2016-2021 Linar Yusupov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,7 +31,7 @@
 #include <raspi/raspi.h>
 #endif /* RASPBERRY_PI */
 
-#define SOFTRF_FIRMWARE_VERSION "1.0-rc8-24640a69"
+#define SOFTRF_FIRMWARE_VERSION "1.0-rc8"
 #define SOFTRF_IDENT            "SoftRF-"
 
 #define ENTRY_EXPIRATION_TIME   10 /* seconds */
@@ -58,8 +58,8 @@
 // KEY:  12345678
 // IP: 192.168.1.1
 // NETMASK: 255.255.255.0
-#define MY_ACCESSPOINT_SSID "Tenda2G"
-#define MY_ACCESSPOINT_PSK  "pepperoni"
+#define MY_ACCESSPOINT_SSID ""
+#define MY_ACCESSPOINT_PSK  ""
 
 #define RELAY_DST_PORT  12390
 #define RELAY_SRC_PORT  (RELAY_DST_PORT - 1)
@@ -157,6 +157,16 @@ typedef struct hardware_info {
 #endif /* ENABLE_AHRS */
 } hardware_info_t;
 
+typedef struct IODev_ops_struct {
+  const char name[16];
+  void (*setup)();
+  void (*loop)();
+  void (*fini)();
+  int (*available)(void);
+  int (*read)(void);
+  size_t (*write)(const uint8_t *buffer, size_t size);
+} IODev_ops_t;
+
 enum
 {
 	SOFTRF_MODE_NORMAL,
@@ -182,14 +192,29 @@ enum
 	SOFTRF_MODEL_SKYWATCH,
 	SOFTRF_MODEL_DONGLE,
 	SOFTRF_MODEL_MULTI,
-	SOFTRF_MODEL_UNI
+	SOFTRF_MODEL_UNI,
+	SOFTRF_MODEL_MINI,
+	SOFTRF_MODEL_BADGE
+};
+
+enum
+{
+	SOFTRF_SHUTDOWN_NONE,
+	SOFTRF_SHUTDOWN_DEFAULT,
+	SOFTRF_SHUTDOWN_DEBUG,
+	SOFTRF_SHUTDOWN_ABORT,
+	SOFTRF_SHUTDOWN_WATCHDOG,
+	SOFTRF_SHUTDOWN_NMEA,
+	SOFTRF_SHUTDOWN_BUTTON,
+	SOFTRF_SHUTDOWN_LOWBAT,
+	SOFTRF_SHUTDOWN_SENSOR
 };
 
 extern ufo_t ThisAircraft;
 extern hardware_info_t hw_info;
 extern const float txrx_test_positions[90][2] PROGMEM;
 
-extern void shutdown(const char *);
+extern void shutdown(int);
 
 #define TXRX_TEST_NUM_POSITIONS (sizeof(txrx_test_positions) / sizeof(float) / 2)
 #define TXRX_TEST_ALTITUDE    438.0

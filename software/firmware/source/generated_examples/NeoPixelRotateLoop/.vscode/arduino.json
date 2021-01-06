@@ -1,0 +1,6 @@
+{
+    "sketch": "NeoPixelRotateLoop.ino",
+    "port": "COM8",
+    "board": "Seeeduino:samd:seeed_XIAO_m0",
+    "configuration": "usbstack=arduino,debug=on"
+}

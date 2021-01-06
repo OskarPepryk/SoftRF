@@ -1,6 +1,6 @@
 /*
  * WiFiHelper.cpp
- * Copyright (C) 2016-2020 Linar Yusupov
+ * Copyright (C) 2016-2021 Linar Yusupov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -246,9 +246,8 @@ void WiFi_setup()
     
     // Go into software AP mode.
     WiFi.mode(WIFI_AP);
-    SoC->WiFi_setOutputPower(WIFI_TX_POWER_MED); // 10 dB
-    // WiFi.setOutputPower(0); // 0 dB
-    //system_phy_set_max_tpw(4 * 0); // 0 dB
+    SoC->WiFi_set_param(WIFI_PARAM_TX_POWER, WIFI_TX_POWER_MED); // 10 dBm
+    SoC->WiFi_set_param(WIFI_PARAM_DHCP_LEASE_TIME, WIFI_DHCP_LEASE_HRS);
     delay(10);
 
     Serial.print(F("Setting soft-AP configuration ... "));

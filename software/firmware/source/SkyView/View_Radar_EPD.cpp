@@ -1,6 +1,6 @@
 /*
  * View_Radar_EPD.cpp
- * Copyright (C) 2019-2020 Linar Yusupov
+ * Copyright (C) 2019-2021 Linar Yusupov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -96,7 +96,7 @@ static void EPD_Draw_NavBoxes()
   uint16_t bottom_navboxes_x = navbox3.x;
   uint16_t bottom_navboxes_y = navbox3.y;
   uint16_t bottom_navboxes_w = navbox3.width + navbox4.width;
-  uint16_t bottom_navboxes_h = maxof2(navbox3.height, navbox3.height);
+  uint16_t bottom_navboxes_h = maxof2(navbox3.height, navbox4.height);
 
 
   display->setPartialWindow(bottom_navboxes_x, bottom_navboxes_y,
@@ -145,8 +145,7 @@ static void EPD_Draw_NavBoxes()
   }
   while (display->nextPage());
 
-//display->powerOff();
-  display->hibernate();
+  display->powerOff();
 }
 
 void EPD_radar_Draw_Message(const char *msg1, const char *msg2)
@@ -191,7 +190,7 @@ void EPD_radar_Draw_Message(const char *msg1, const char *msg2)
     }
     while (display->nextPage());
 
-    display->hibernate();
+    display->powerOff();
   }
 }
 
@@ -261,8 +260,8 @@ static void EPD_Draw_Radar()
     for (int i=0; i < MAX_TRACKING_OBJECTS; i++) {
       if (Container[i].ID && (now() - Container[i].timestamp) <= EPD_EXPIRATION_TIME) {
 
-        int16_t rel_x;
-        int16_t rel_y;
+        float rel_x;
+        float rel_y;
         float distance;
         float bearing;
 
@@ -297,18 +296,17 @@ static void EPD_Draw_Radar()
 
           bearing -= ThisAircraft.Track;
 
-          rel_x = constrain(distance * sin(radians(bearing)),
-                                       -32768, 32767);
-          rel_y = constrain(distance * cos(radians(bearing)),
-                                       -32768, 32767);
+          rel_x = distance * sin(radians(bearing));
+          rel_y = distance * cos(radians(bearing));
+
           break;
         default:
           /* TBD */
           break;
         }
 
-        int16_t x = ((int32_t) rel_x * (int32_t) radius) / divider;
-        int16_t y = ((int32_t) rel_y * (int32_t) radius) / divider;
+        int16_t x = constrain((rel_x * radius) / divider, -32768, 32767);
+        int16_t y = constrain((rel_y * radius) / divider, -32768, 32767);
 
         if        (Container[i].RelativeVertical >   EPD_RADAR_V_THRESHOLD) {
           if (isTeam) {
@@ -440,7 +438,7 @@ static void EPD_Draw_Radar()
   }
   while (display->nextPage());
 
-  display->hibernate();
+  display->powerOff();
 }
 
 static void EPD_Update_NavBoxes()
@@ -536,7 +534,7 @@ static void EPD_Update_NavBoxes()
     navbox4.prev_value = navbox4.value;
   }
 
-  display->hibernate();
+  display->powerOff();
 }
 
 void EPD_radar_setup()

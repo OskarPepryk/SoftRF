@@ -1,6 +1,6 @@
 /*
  * SoCHelper.h
- * Copyright (C) 2019-2020 Linar Yusupov
+ * Copyright (C) 2019-2021 Linar Yusupov
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -36,7 +36,7 @@ typedef struct SoC_ops_struct {
   void (*sleep_ms)(int);
   uint32_t (*getChipId)();
   bool (*EEPROM_begin)(size_t);
-  void (*WiFi_setOutputPower)(int);
+  void (*WiFi_set_param)(int, int);
   bool (*WiFi_hostname)(String);
   void (*WiFiUDP_stopAll)();
   void (*WiFi_transmit_UDP)(int, byte *, size_t);
